@@ -30,7 +30,7 @@ PADD (formerly Chronometer2) is a more expansive version of the original chronom
 ### Dependencies
   - curl
   - jq
-  - dig
+  - dig or kdig
   - tput
 
 ## Using PADD

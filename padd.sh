@@ -110,10 +110,10 @@ TestAPIAvailability() {
         # e.g., "http://localhost:80/api" or "https://domain.com:443/api"
         if [ -z "${SERVER}" ] || [ "${SERVER}" = "localhost" ] || [ "${SERVER}" = "127.0.0.1" ]; then
             # --server was not set or set to local, assuming we're running locally
-            cmdResult="$(dig +short chaos txt local.api.ftl @localhost 2>&1; echo $?)"
+            cmdResult="$(${dig_tool} +short chaos txt local.api.ftl @localhost 2>&1; echo $?)"
         else
             # --server was set, try to get response from there
-            cmdResult="$(dig +short chaos txt domain.api.ftl @"${SERVER}" 2>&1; echo $?)"
+            cmdResult="$(${dig_tool} +short chaos txt domain.api.ftl @"${SERVER}" 2>&1; echo $?)"
         fi
 
         # Gets the return code of the dig command (last line)
@@ -1506,6 +1506,14 @@ secretRead() {
 }
 
 check_dependencies() {
+    dig_tool=""
+    if command -v kdig >/dev/null 2>&1; then
+       dig_tool="kdig"
+    fi
+    if command -v dig >/dev/null 2>&1; then
+       dig_tool="dig"
+    fi
+
     local hasDeps=true
     # Check for required dependencies
     if ! command -v curl >/dev/null 2>&1; then
@@ -1518,8 +1526,8 @@ check_dependencies() {
         hasDeps=false
     fi
 
-    if ! command -v dig >/dev/null 2>&1; then
-        printf "%b" "${check_box_bad} Error!\n    'dig' is missing but required.\n"
+    if [ -z "$dig_tool" ]; then
+        printf "%b" "${check_box_bad} Error!\n    Either 'dig' or 'kdig' are required, but both are missing.\n"
         hasDeps=false
     fi
 
